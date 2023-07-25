@@ -5,7 +5,7 @@
     <!-- Load Leaflet and Leaflet.heat library -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-heat/dist/leaflet-heat.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     <style>
         #map {
             height: 500px;
@@ -15,10 +15,16 @@
 <body>
     <h1>COVID-19 Dashboard</h1>
     <div>
-        <label for="column">Select a Column:</label>
-        <select id="column" name="column">
-            {% for column in columns %}
-                <option value="{{ column }}">{{ column }}</option>
+        <label for="table">Select a Table:</label>
+        <select id="table" name="table">
+            {% for table in tables %}
+                <option value="{{ table }}">{{ table }}</option>
+            {% endfor %}
+        </select>
+        <label for="date">Select a Date:</label>
+        <select id="date" name="date">
+            {% for date in dates %}
+                <option value="{{ date }}">{{ date }}</option>
             {% endfor %}
         </select>
     </div>
