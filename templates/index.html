@@ -2,20 +2,27 @@
 <html>
 <head>
     <title>COVID-19 Dashboard</title>
-    <!-- Load Plotly.js library -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Load Leaflet and Leaflet.heat library -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-heat/dist/leaflet-heat.js"></script>
+    <style>
+        #map {
+            height: 500px;
+        }
+    </style>
 </head>
 <body>
     <h1>COVID-19 Dashboard</h1>
     <div>
-        <label for="country">Select a Country:</label>
-        <select id="country" name="country">
-            {% for country in countries %}
-                <option value="{{ country['Country/Region'] }}">{{ country['Country/Region'] }}</option>
+        <label for="column">Select a Column:</label>
+        <select id="column" name="column">
+            {% for column in columns %}
+                <option value="{{ column }}">{{ column }}</option>
             {% endfor %}
         </select>
     </div>
-    <div id="chart"></div>
+    <div id="map"></div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
