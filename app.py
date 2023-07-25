@@ -1,7 +1,6 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify
 import sqlite3
 import pandas as pd
-import plotly.graph_objs as go
 import json
 
 app = Flask(__name__)
@@ -12,36 +11,31 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# Function to get the confirmed cases data for a specific country
-def get_confirmed_data(conn, country='US'):
-    query = f"SELECT * FROM confirmed WHERE `Country/Region` = '{country}';"
-    df_confirmed = pd.read_sql_query(query, conn)
-    
-    # Rename the last column to a valid date format
-    columns = df_confirmed.columns.tolist()
-    columns[-1] = "March/23"
-    df_confirmed.columns = columns
-    
-    return df_confirmed
+# Function to get the data for a specific column
+def get_column_data(conn, column_name='January/20'):
+    query = f"SELECT `Lat`, `Long`, `{column_name}` FROM confirmed;"
+    df_column = pd.read_sql_query(query, conn)
+    return df_column
 
 # Home page route
 @app.route('/')
 def index():
     conn = get_db_connection()
-    countries = conn.execute("SELECT DISTINCT `Country/Region` FROM confirmed;").fetchall()
+    columns = conn.execute("PRAGMA table_info(confirmed);").fetchall()
+    column_names = [col['name'] for col in columns if col['name'] not in ['Lat', 'Long']]
     conn.close()
 
-    return render_template('index.html', countries=countries)
+    return render_template('index.html', columns=column_names)
 
-# Route to get confirmed cases data for a specific country
-@app.route('/country/<country>')
-def get_country_data(country):
+# Route to get data for a specific column
+@app.route('/column/<column_name>')
+def get_column(column_name):
     conn = get_db_connection()
-    df_confirmed = get_confirmed_data(conn, country)
+    df_column = get_column_data(conn, column_name)
     conn.close()
 
     # Convert the DataFrame to a JSON string
-    data_json = df_confirmed.to_json(orient='records')
+    data_json = df_column.to_json(orient='records')
     data = json.loads(data_json)
 
     return jsonify(data)
