@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>COVID-19 Cases Comparison</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>COVID-19 Cases Comparison</h1>
+    <select id="country-selector">
+        <option value="US">United States</option>
+        {% for country in countries %}
+            <option value="{{ country }}">{{ country }}</option>
+        {% endfor %}
+    </select>
+    <div id="chart"></div>
+
+    <script>
+        $(document).ready(function () {
+            // Initialize chart with US data on page load
+            $.ajax({
+                type: 'POST',
+                url: '/compare',
+                contentType: 'application/json',
+                data: JSON.stringify({ 'country': 'US' }),
+                success: function (data) {
+                    drawChart(data);
+                }
+            });
+
+            // Event handler for country selection
+            $('#country-selector').change(function () {
+                var selectedCountry = $(this).val();
+
+                // Fetch and update data for selected country
+                $.ajax({
+                    type: 'POST',
+                    url: '/compare',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ 'country': selectedCountry }),
+                    success: function (data) {
+                        drawChart(data);
+                    }
+                });
+            });
+
+            // Function to draw the chart using the received data
+            function drawChart(data) {
+                // Your chart rendering code here (e.g., using Chart.js or other libraries)
+                // Example using Chart.js:
+                // var usData = data['US'];
+                // var selectedCountryData = data['SelectedCountry'];
+                // ...
+            }
+        });
+    </script>
+</body>
+</html>
