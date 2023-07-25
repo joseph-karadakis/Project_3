@@ -2,8 +2,20 @@
 <html>
 <head>
     <title>COVID-19 Dashboard</title>
+    <!-- Load Plotly.js library -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
     <h1>COVID-19 Dashboard</h1>
+    <div>
+        <label for="country">Select a Country:</label>
+        <select id="country" name="country">
+            {% for country in countries %}
+                <option value="{{ country['Country/Region'] }}">{{ country['Country/Region'] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div id="chart"></div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
