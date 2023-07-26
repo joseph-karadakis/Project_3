@@ -19,10 +19,10 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-md-2">
+      <div class="col-md-4">
         <div class="well">
-          <h5>Test Subject ID No.:</h5>
-          <select id="selDataset" onchange="optionChanged(this.value)"></select>
+          <h5>Select A Country:</h5>
+          <select id="country-dropdown" onchange="optionChanged(this.value)"></select>
         </div>
         <!-- <div class="panel panel-primary">
           <div class="panel-heading">
@@ -31,11 +31,16 @@
           <div id="sample-metadata" class="panel-body"></div>
         </div>
       </div>
-      <div class="col-md-10">
-        <div id="bar"></div>
-      </div>
-      <div class="col-md-5">
-        <div id="gauge"></div>
+      <div class="col-md-12">
+        <div id="line"></div>
+        <script src="../JSON Data/confirmed_data.js"></script>
+        <script src="../JSON Data/deaths_data.js"></script>
+        <script src="../JSON Data/recovery_data.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+            createLineChart(jsonConfirmed);
+            });
+        </script>
       </div>
     </div>
     <div class="row">
@@ -56,7 +61,7 @@
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="../static/an_script.js"></script>
-
+  
 
 </body>
 
