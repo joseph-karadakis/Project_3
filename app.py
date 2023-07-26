@@ -1,89 +1,59 @@
-from flask import Flask, render_template, request, jsonify
-import pandas as pd
 import sqlite3
-import folium
+from flask import Flask, render_template, jsonify
 
 app = Flask(__name__)
 
-def generate_map(table_name, selected_date):
-    conn = sqlite3.connect('database/dashboard_data.db')
+# Function to get data from the selected table and date
+def get_data(selected_table, selected_date):
+    conn = sqlite3.connect("database/dashboard_data.db")
+    cursor = conn.cursor()
 
-    if table_name == "confirmed":
-        query = f"""
-            SELECT c.Country_Region, c.Lat, c.Long, c.confirmed_cases, d.deaths, r.recovery
-            FROM confirmed c
-            LEFT JOIN deaths d ON c.Country_Region = d.Country_Region AND c.date = d.date
-            LEFT JOIN recovery r ON c.Country_Region = r.Country_Region AND c.date = r.date
-            WHERE c.date = ?
-        """
-    else:
-        query = f"SELECT Country_Region, Lat, Long, {table_name} FROM {table_name} WHERE date = ?"
+    # Fetch data from the selected table and date
+    cursor.execute(f"SELECT Province_State, Country_Region, Lat, Long, {selected_table} FROM {selected_table} WHERE date=?", (selected_date,))
+    data = cursor.fetchall()
 
-    df = pd.read_sql_query(query, conn, params=[selected_date])
+    # Get column names of the selected table
+    cursor.execute(f"PRAGMA table_info({selected_table})")
+    columns_info = cursor.fetchall()
+    columns_names = [column[1] for column in columns_info]
+
+    # Choose the last column of the selected table
+    last_column = columns_names[-1]
+
     conn.close()
+    return data, last_column
 
-    df.dropna(subset=['Lat', 'Long'], inplace=True)  # Drop rows with missing latitude or longitude values
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-    m = folium.Map(location=[30, 0], zoom_start=2)
+@app.route('/get_dates/<selected_table>')
+def send_dates(selected_table):
+    conn = sqlite3.connect("database/dashboard_data.db")
+    cursor = conn.cursor()
 
-    for _, row in df.iterrows():
-        country = row['Country_Region']
-        lat = row['Lat']
-        long = row['Long']
-        cases = row['confirmed_cases'] if 'confirmed_cases' in df.columns else 0
-        deaths = row['deaths'] if 'deaths' in df.columns else 0
-        recovery = row['recovery'] if 'recovery' in df.columns else 0
+    # Fetch all unique dates for the selected table
+    cursor.execute(f"SELECT DISTINCT date FROM {selected_table}")
+    dates = [date[0] for date in cursor.fetchall()]
 
-        popup_text = f"Country: {country}<br>Confirmed Cases: {cases}<br>Deaths: {deaths}<br>Recovery: {recovery}"
-        color = '#FF0000' if table_name == 'confirmed' else '#0000FF' if table_name == 'deaths' else '#00FF00'
-        folium.CircleMarker(location=[lat, long], radius=5, popup=popup_text, color=color, fill=True, fill_opacity=0.7).add_to(m)
-
-    return m._repr_html_()
-
-
-@app.route('/get_dates/<string:table_name>')
-def get_dates(table_name):
-    conn = sqlite3.connect('database/dashboard_data.db')
-    query = f"SELECT DISTINCT date FROM {table_name}"
-    dates = pd.read_sql_query(query, conn)['date'].tolist()
     conn.close()
-
     return jsonify(dates)
 
-@app.route('/data/<string:table_name>/<string:selected_date>')
-def get_data(table_name, selected_date):
-    conn = sqlite3.connect('database/dashboard_data.db')
-    query = f"SELECT Country_Region, Lat, Long, {table_name} FROM {table_name} WHERE date = ?"
-    df = pd.read_sql_query(query, conn, params=[selected_date])
-    conn.close()
+@app.route('/get_data/<selected_table>/<selected_date>')
+def send_data(selected_table, selected_date):
+    data, last_column = get_data(selected_table, selected_date[:7])
 
-    df.dropna(subset=['Lat', 'Long'], inplace=True)  # Drop rows with missing latitude or longitude values
+    # Create a list of dictionaries, where each dictionary represents a row of data
+    data_list = []
+    for row in data:
+        data_dict = {
+            'Lat': row[2],
+            'Long': row[3],
+            'Cases': row[4]
+        }
+        data_list.append(data_dict)
 
-    return df.to_json(orient='records')
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    conn = sqlite3.connect('database/dashboard_data.db')
-
-    if request.method == 'POST':
-        table_name = request.form['table']
-        selected_date = request.form['date']
-    else:
-        table_name = pd.read_sql_query("SELECT name FROM sqlite_master WHERE type='table'", conn)['name'][0]
-        selected_date = pd.read_sql_query(f"SELECT DISTINCT date FROM {table_name}", conn)['date'][0]
-
-    map_html = generate_map(table_name, selected_date)
-
-    query = "SELECT name FROM sqlite_master WHERE type='table'"
-    tables = pd.read_sql_query(query, conn)['name'].tolist()
-
-    # Get the dates available for the selected table
-    query = f"SELECT DISTINCT date FROM {table_name}"
-    dates = pd.read_sql_query(query, conn)['date'].tolist()
-
-    conn.close()
-
-    return render_template('index.html', tables=tables, dates=dates, selected_table=table_name, selected_date=selected_date, map_html=map_html)
+    return jsonify(data=data_list, last_column=last_column)
 
 if __name__ == '__main__':
     app.run(debug=True)

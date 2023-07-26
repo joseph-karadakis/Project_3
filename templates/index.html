@@ -1,99 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>COVID-19 Map</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVID-19 Dashboard</title>
+    <!-- Include Bootstrap CSS files from the local path -->
+    <link rel="stylesheet" href="static/bootstrap@5.3.0/css/bootstrap.min.css">
+
+    <!-- Include Leaflet CSS file from the local path -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 </head>
+
 <body>
-    <h1>COVID-19 Map</h1>
-    <form method="POST" action="/">
-        <label for="table">Choose a table:</label>
-        <select id="table" name="table">
-            {% for table in tables %}
-                <option value="{{ table }}" {% if table == selected_table %}selected{% endif %}>{{ table }}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <label for="date">Choose a date:</label>
-        <select id="date" name="date">
-            {% for date in dates %}
-                <option value="{{ date }}" {% if date == selected_date %}selected{% endif %}>{{ date }}</option>
-            {% endfor %}
-        </select>
-    </form>
-    <br>
-    <div id="map">
-        {{ map_html|safe }}
+    <div class="container">
+        <h1>COVID-19 Dashboard</h1>
+        <div class="controls">
+            <label for="tableSelect">Select Table:</label>
+            <select id="tableSelect">
+                <option value="" selected disabled>Select Table</option>
+                <option value="confirmed">Confirmed Cases</option>
+                <option value="deaths">Deaths</option>
+                <option value="recovery">Recovery</option>
+            </select>
+
+            <label for="dateSelect">Select Date:</label>
+            <select id="dateSelect" disabled>
+                <option value="" selected disabled>Select Date</option>
+            </select>
+
+            <button id="plotBtn" class="btn btn-primary" data-selected-table="">Generate Map</button>
+        </div>
+        <div id="map" class="leaflet-container" style="height: 800px; width: 1200px; margin-top: 20px;"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            let myMap = L.map('map').setView([0, 0], 2);
+    <!-- Include Axios JS file from the local path -->
+    <script src="static/axios/axios.min.js"></script>
 
-            // Adding the tile layer
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(myMap);
+    <!-- Include Bootstrap JS files from the local path -->
+    <script src="static/bootstrap@5.3.0/js/bootstrap.bundle.min.js"></script>
 
-            let heat = null;
+    <!-- Include Leaflet JS file from cdn -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
-            // Function to fetch the data for the selected table and date from the Flask route
-            function updateMap(selectedTable, selectedDate) {
-                fetch(`/data/${selectedTable}/${selectedDate}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (!Array.isArray(data)) {
-                            throw new Error('Data is not in the expected format');
-                        }
-
-                        if (heat !== null) {
-                            myMap.removeLayer(heat);
-                        }
-
-                        let heatArray = data.map(row => [row.Lat, row.Long, row[selectedTable]]);
-                        heat = L.heatLayer(heatArray, {
-                            radius: 20,
-                            blur: 35,
-                            maxZoom: 18,
-                            gradient: {
-                                0.4: 'green',
-                                0.6: 'yellow',
-                                1.0: 'red',
-                            },
-                        }).addTo(myMap);
-                    })
-                    .catch(error => {
-                        console.error('Error:', error.message);
-                    });
-            }
-
-            // Get the default selected table and date
-            const selectedTable = document.getElementById('table').value;
-            const selectedDate = document.getElementById('date').value;
-
-            // Call the updateMap function with the default selected table and date
-            updateMap(selectedTable, selectedDate);
-
-            // Add event listeners to the dropdown lists to update the map when a new table or date is selected
-            document.getElementById('table').addEventListener('change', function() {
-                const selectedTable = this.value;
-                const selectedDate = document.getElementById('date').value;
-                updateMap(selectedTable, selectedDate);
-            });
-
-            document.getElementById('date').addEventListener('change', function() {
-                const selectedTable = document.getElementById('table').value;
-                const selectedDate = this.value;
-                updateMap(selectedTable, selectedDate);
-            });
-        });
-    </script>
+    <!-- Include custom script.js file -->
+    <script src="static/script.js"></script>
 </body>
+
 </html>
