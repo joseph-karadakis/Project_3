@@ -15,7 +15,7 @@ def get_data(selected_table, selected_date):
     # Get column names of the selected table
     cursor.execute(f"PRAGMA table_info({selected_table})")
     columns_info = cursor.fetchall()
-    columns_names = [column[1] for column in columns_info]
+    columns_names = [column[2] for column in columns_info]
 
     # Choose the last column of the selected table
     last_column = columns_names[-1]
@@ -47,6 +47,8 @@ def send_data(selected_table, selected_date):
     data_list = []
     for row in data:
         data_dict = {
+            'Province':row[0],
+            'Country': row[1],
             'Lat': row[2],
             'Long': row[3],
             'Cases': row[4]
@@ -54,6 +56,18 @@ def send_data(selected_table, selected_date):
         data_list.append(data_dict)
 
     return jsonify(data=data_list, last_column=last_column)
+
+@app.route('/get_deaths_data/deaths/<selected_date>/<lat>/<long>')
+def get_deaths_data(selected_date, lat, long):
+    conn = sqlite3.connect("database/dashboard_data.db")
+    cursor = conn.cursor()
+
+    # Fetch deaths data for the selected date and coordinates
+    cursor.execute(f"SELECT deaths FROM deaths WHERE date=? AND lat=? AND long=?", (selected_date, lat, long))
+    deaths = cursor.fetchone()
+
+    conn.close()
+    return jsonify(deaths=deaths[0])
 
 if __name__ == '__main__':
     app.run(debug=True)
