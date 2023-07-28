@@ -8,13 +8,13 @@ function getUniqueCountries(data) {
     // Filter data for the selected country based on the dataset
     var data;
     switch (dataset) {
-      case 'confirmed':
+      case 'Confirmed Cases':
         data = confirmed_data.filter(item => item.Location === selectedCountry);
         break;
-      case 'deaths':
+      case 'Deaths':
         data = deaths_data.filter(item => item.Location === selectedCountry);
         break;
-      case 'recovery':
+      case 'Recoveries':
         data = recovery_data.filter(item => item.Location === selectedCountry);
         break;
       default:
@@ -31,6 +31,13 @@ function getUniqueCountries(data) {
     var sortedIndices = dateObjects.map((_, index) => index).sort((a, b) => dateObjects[a] - dateObjects[b]);
     xValues = sortedIndices.map(index => xValues[index]);
     
+    // Define colors for each dataset
+    var colors = {
+        'Confirmed Cases': 'blue',
+        'Deaths': 'red',
+        'Recoveries': 'green'
+    };
+
     // Create the trace for the stacked line chart
     var trace = {
         x: xValues,
@@ -39,13 +46,16 @@ function getUniqueCountries(data) {
         mode: 'lines', // Show only lines for stacked line graph
         stackgroup: 'one', // Assign a stackgroup to create the stacking effect
         line: {
-            width: 2 // Set the line width
-        }
+        width: 2, // Set the line width
+        color: colors[dataset] // Set the color for the dataset
+        },
+        fill: 'tozeroy',
+        fillcolor: colors[dataset] + '80'
     };
 
     // Layout for the stacked line chart
     var layout = {
-        title: `COVID-19 Confirmed Cases Stacked Line Chart (${selectedCountry})`,
+        title: `Record of COVID-19 Cases (${selectedCountry})`,
         xaxis: {
             title: 'Date',
             range: [xValues[0], xValues[xValues.length - 1]] // Use the first and last dates for range
@@ -75,11 +85,15 @@ Promise.all([
   // Combine all datasets into one array
   var allData = confirmed_data.concat(deaths_data, recovery_data);
 
- // Fetch unique countries from the combined dataset
+// Fetch unique countries from the combined dataset
 var uniqueCountries = getUniqueCountries(allData);
 
 // Create the country dropdown
 var countryDropdown = document.getElementById('country-dropdown');
+
+// Clear the existing options in the dropdown (add this line)
+countryDropdown.innerHTML = '';
+
 uniqueCountries.forEach(country => {
   var option = document.createElement('option');
   option.text = country;
@@ -88,12 +102,12 @@ uniqueCountries.forEach(country => {
 
 // Create the dataset dropdown
 var datasetDropdown = document.getElementById('dataset-dropdown');
-var datasets = ['confirmed', 'deaths', 'recovery'];
+var datasets = ['Confirmed Cases', 'Deaths', 'Recoveries'];
 
 // Use a Set to store unique datasets
 var uniqueDatasets = new Set(datasets);
 
-// Clear the existing options in the dropdown
+// Clear the existing options in the dropdown (add this line)
 datasetDropdown.innerHTML = '';
 
 // Add unique datasets to the dropdown
@@ -103,12 +117,13 @@ uniqueDatasets.forEach(dataset => {
   datasetDropdown.add(option);
 });
 
-  // Add event listener for both dropdowns
-  countryDropdown.addEventListener('change', updateChart);
-  datasetDropdown.addEventListener('change', updateChart);
+// Add event listener for both dropdowns
+countryDropdown.addEventListener('change', updateChart);
+datasetDropdown.addEventListener('change', updateChart);
 
-  // Initial chart creation with the first country and dataset as default
-  var selectedCountry = uniqueCountries[0];
-  var selectedDataset = datasets[0];
-  createStackedLineChart(selectedCountry, selectedDataset);
+// Initial chart creation with the first country and dataset as default
+var selectedCountry = uniqueCountries[0];
+var selectedDataset = datasets[0];
+createStackedLineChart(selectedCountry, selectedDataset);
+
 });
