@@ -7,6 +7,8 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>COVID-19 Dashboard</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> <!-- Add Plotly.js library -->
 </head>
 
 <body>
@@ -21,47 +23,80 @@
     <div class="row">
       <div class="col-md-4">
         <div class="well">
+          <h5>Select A Dataset:</h5>
+          <select id="dataset-dropdown" onchange="updateChart()"></select>
           <h5>Select A Country:</h5>
-          <select id="country-dropdown" onchange="optionChanged(this.value)"></select>
+          <select id="country-dropdown" onchange="updateChart()"></select>
         </div>
-        <!-- <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h3 class="panel-title">Demographic Info</h3> -->
-          </div>
-          <div id="sample-metadata" class="panel-body"></div>
-        </div>
+        <script>
+          // Declare global variables to hold the datasets and dropdowns
+          var confirmed_data, deaths_data, recovery_data;
+          var countryDropdown, datasetDropdown; // Declare dropdown variables in the global scope
+        
+          // Fetch data and create dropdowns
+          Promise.all([
+            d3.json('../JSON Data/confirmed_data.js'),
+            d3.json('../JSON Data/deaths_data.js'),
+            d3.json('../JSON Data/recovery_data.js')
+          ]).then(function (data) {
+            // Assign data to variables
+            confirmed_data = data[0];
+            deaths_data = data[1];
+            recovery_data = data[2];
+        
+            // Combine all datasets into one array
+            var allData = confirmed_data.concat(deaths_data, recovery_data);
+        
+            // Fetch unique countries from the combined dataset
+            var uniqueCountries = getUniqueCountries(allData);
+        
+            // Create the country dropdown
+            countryDropdown = document.getElementById('country-dropdown'); // Assign the countryDropdown variable
+            uniqueCountries.forEach(country => {
+              var option = document.createElement('option');
+              option.text = country;
+              countryDropdown.add(option);
+            });
+        
+           // Create the dataset dropdown
+            datasetDropdown = document.getElementById('dataset-dropdown'); // Assign the datasetDropdown variable
+
+            // Clear the existing options in the dropdown
+            datasetDropdown.innerHTML = '';
+
+            var datasets = ['confirmed', 'deaths', 'recovery'];
+            datasets.forEach(dataset => {
+              var option = document.createElement('option');
+              option.text = dataset;
+              datasetDropdown.add(option);
+            });
+        
+            // Add event listener for both dropdowns
+            countryDropdown.addEventListener('change', updateChart);
+            datasetDropdown.addEventListener('change', updateChart);
+        
+            // Initial chart creation with the first country and dataset as default
+            var selectedCountry = uniqueCountries[0];
+            var selectedDataset = datasets[0];
+            createStackedLineChart(selectedCountry, selectedDataset);
+          });
+        
+            // Function to update the chart based on the selected values
+            function updateChart() {
+            var selectedCountry = countryDropdown.value;
+            var selectedDataset = datasetDropdown.value;
+            createStackedLineChart(selectedCountry, selectedDataset);
+          }
+        </script>
+        
+        
       </div>
       <div class="col-md-12">
-        <div id="line"></div>
-        <script src="../JSON Data/confirmed_data.js"></script>
-        <script src="../JSON Data/deaths_data.js"></script>
-        <script src="../JSON Data/recovery_data.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-            createLineChart(jsonConfirmed);
-            });
-        </script>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12">
-        <div id="bubble"></div>
-        <script src="../JSON Data/confirmed_data.js"></script>
-        <script src="../JSON Data/deaths_data.js"></script>
-        <script src="../JSON Data/recovery_data.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-            bubbleChart(jsonConfirmed);
-            });
-        </script>
+        <div id="line-stack"></div>
+        <script src="../static/an_script_stack.js"></script>
       </div>
     </div>
   </div>
-
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  <script src="../static/an_script.js"></script>
-  
 
 </body>
 

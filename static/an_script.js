@@ -1,63 +1,12 @@
 
-function getUniqueCountries(jsonConfirmed) {
-    return [...new Set(jsonConfirmed.map(item => item.Country_Region))];
+function getUniqueCountries(jsonConfirmed_daily) {
+    return [...new Set(jsonConfirmed_daily.map(item => item.Location))];
 }
-
-function bubbleChart(selectedCountry) {
-
-    // Extract the required data for the bubble chart
-    var filteredData = jsonConfirmed.filter(item => item.Country_Region === selectedCountry);
-
-    // Extract the required data for the line chart
-    var xValues = filteredData.map(item => item.date);
-    var yValues = filteredData.map(item => item.confirmed_cases);
-    var textValues = filteredData.map(item => item.Country_Region);
-    var markerSize = filteredData.map(item => Math.sqrt(item.confirmed_cases));
-    
-    var dateObjects = xValues.map(dateString => new Date(dateString));
-
-    // Sort the dates in chronological order
-    var sortedIndices = dateObjects.map((_, index) => index).sort((a, b) => dateObjects[a] - dateObjects[b]);
-    xValues = sortedIndices.map(index => xValues[index]);
-
-    // Create the trace for the bubble chart
-    var trace = {
-        x: xValues,
-        y: yValues,
-        text: textValues,
-        mode: 'markers',
-        marker: {
-            size: markerSize,
-            sizemode: 'area',
-            sizeref: 0.005, // Adjust this value to control the size of bubbles
-            color: 'blue',
-            alpha: 0.50
-        }
-    };
-    
-    // Layout for the bubble chart
-    var layout = {
-        title: 'COVID-19 Confirmed Cases Bubble Chart',
-        xaxis: {
-            title: 'Date',
-            range: [xValues[0], xValues[xValues.length + 1]]
-        },
-        yaxis: {
-            title: 'Confirmed Cases',
-            range: [0, Math.max(...yValues)+1000]
-        },
-        height: 600
-    };
-    
-    // Combine the trace and layout and plot the chart
-    Plotly.newPlot('bubble', [trace], layout);
-    
-    };
     
 // Function to create the line chart
 function createLineChart(selectedCountry) {
     // Filter data for the selected country
-    var filteredData = jsonConfirmed.filter(item => item.Country_Region === selectedCountry);
+    var filteredData = jsonConfirmed_daily.filter(item => item.Location === selectedCountry);
 
     // Extract the required data for the line chart
     var xValues = filteredData.map(item => item.date);
@@ -90,7 +39,7 @@ function createLineChart(selectedCountry) {
         title: `COVID-19 Confirmed Cases Line Chart (${selectedCountry})`,
         xaxis: {
             title: 'Date',
-            range: [xValues[0], xValues[xValues.length + 1]]
+            range: [xValues[0], xValues[xValues.length]]
         },
         yaxis: {
             title: 'Confirmed Cases',
@@ -105,7 +54,7 @@ function createLineChart(selectedCountry) {
 
 // Create the dropdown with unique Country_Region options
 var countryDropdown = document.getElementById('country-dropdown');
-var uniqueCountries = getUniqueCountries(jsonConfirmed);
+var uniqueCountries = getUniqueCountries(jsonConfirmed_daily);
 uniqueCountries.forEach(country => {
     var option = document.createElement('option');
     option.text = country;
@@ -116,9 +65,7 @@ uniqueCountries.forEach(country => {
 countryDropdown.addEventListener('change', function () {
     var selectedCountry = countryDropdown.value;
     createLineChart(selectedCountry);
-    bubbleChart(selectedCountry);
 });
 
 // Initial chart creation with the first country as default
 createLineChart(uniqueCountries[0]);
-bubbleChart(uniqueCountries[0]);
