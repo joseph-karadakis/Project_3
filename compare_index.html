@@ -14,28 +14,20 @@
 <body>
     <h1>COVID-19 Cases Comparison</h1>
     <form id="countryForm">
-        <!-- Country 1 Drop-down -->
-        <label for="country1">Select the first country:</label>
-        <select id="country1" name="country1">
+        <!-- Country Drop-down -->
+        <label for="country">Select a country:</label>
+        <select id="country" name="country">
             {% for country in countries %}
                 <option value="{{ country }}" {% if selected_country1 == country %}selected{% endif %}>{{ country }}</option>
-            {% endfor %}
-        </select>
-
-        <!-- Country 2 Drop-down -->
-        <label for="country2">Select the second country:</label>
-        <select id="country2" name="country2">
-            {% for country in countries %}
-                <option value="{{ country }}" {% if selected_country2 == country %}selected{% endif %}>{{ country }}</option>
             {% endfor %}
         </select>
 
         <!-- Table Drop-down -->
         <label for="table">Select a table:</label>
         <select id="table" name="table">
-            {% for table in tables %}
-                <option value="{{ table }}" {% if selected_table == table %}selected{% endif %}>{{ table }}</option>
-            {% endfor %}
+            <option value="confirmed" {% if selected_table == 'confirmed' %}selected{% endif %}>Confirmed Cases</option>
+            <option value="deaths" {% if selected_table == 'deaths' %}selected{% endif %}>Deaths</option>
+            <option value="recovery" {% if selected_table == 'recovery' %}selected{% endif %}>Recovery</option>
         </select>
 
         <button type="button" onclick="compareData()">Compare</button>
@@ -50,10 +42,9 @@
         google.charts.load('current', {'packages':['corechart']});
         google.charts.setOnLoadCallback(drawChart);
 
-        // Sends a POST request to the server with the selected countries and table and calls the function to draw the chart with the returned data
+        // Sends a POST request to the server with the selected country and table and calls the function to draw the chart with the returned data
         function compareData() {
-            const selectedCountry1 = document.getElementById("country1").value;
-            const selectedCountry2 = document.getElementById("country2").value;
+            const selectedCountry = document.getElementById("country").value;
             const selectedTable = document.getElementById("table").value;
             fetch("/compare", {
                 method: "POST",
@@ -61,42 +52,38 @@
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    country1: selectedCountry1,
-                    country2: selectedCountry2,
+                    country: selectedCountry,
                     table: selectedTable
                 })
             })
             .then(response => response.json())
             .then(data => {
-                drawChartWithData(data);
+                drawChartWithData(data, selectedCountry);
             })
             .catch(error => {
                 console.error("Error fetching data:", error);
             });
         }
 
-        // Draws a bar chart with the data for the selected countries and table
-        function drawChartWithData(data) {
+        // Draws a bar chart with the data for the selected country and table
+        function drawChartWithData(data, country) {
             var dataTable = new google.visualization.DataTable();
             dataTable.addColumn('string', 'Date');
-            dataTable.addColumn('number', 'Country 1');
-            dataTable.addColumn('number', 'Country 2');
+            dataTable.addColumn('number', country);
             
-            // Combines data for both countries into one array for the chart
-            const dates = [...new Set([...data.Country1.map(item => item.date), ...data.Country2.map(item => item.date)])];
-            for (let date of dates) {
-                const casesCountry1 = data.Country1.find(item => item.date === date)?.cases || 0;
-                const casesCountry2 = data.Country2.find(item => item.date === date)?.cases || 0;
-                dataTable.addRow([date, casesCountry1, casesCountry2]);
+            // Add data rows for the chart
+            for (let item of data[country]) {
+                dataTable.addRow([item.date, item.cases]);
             }
+
             // Sets options for the chart
             var options = {
-                title: 'COVID-19 Cases Comparison',
+                title: 'COVID-19 Cases for ' + country,
                 legend: { position: 'top' },
-                colors: ['blue', 'red'],
+                colors: ['blue'],
                 bars: 'vertical',
                 vAxis: { title: 'Cases' },
-                hAxis: { title: 'Date' }
+                hAxis: { title: 'Date', showTextEvery: 1, slantedText: true }
             };
             // Draws the chart in the specified div
             var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
@@ -105,5 +92,9 @@
     </script>
 </body>
 </html>
+
+
+
+
 
 
