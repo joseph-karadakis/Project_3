@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>COVID-19 Cases Comparison</title>
+    <style>
+        /* Style the chart container to make it larger */
+        #chart_div {
+            width: 100%;
+            height: 500px;
+            margin: 0 auto; /* Center the chart on the page */
+        }
+    </style>
+</head>
+<body>
+    <h1>COVID-19 Cases Comparison</h1>
+    <form id="countryForm">
+        <!-- Country 1 Drop-down -->
+        <label for="country1">Select the first country:</label>
+        <select id="country1" name="country1">
+            {% for country in countries %}
+                <option value="{{ country }}" {% if selected_country1 == country %}selected{% endif %}>{{ country }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Country 2 Drop-down -->
+        <label for="country2">Select the second country:</label>
+        <select id="country2" name="country2">
+            {% for country in countries %}
+                <option value="{{ country }}" {% if selected_country2 == country %}selected{% endif %}>{{ country }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Table Drop-down -->
+        <label for="table">Select a table:</label>
+        <select id="table" name="table">
+            <option value="confirmed" {% if selected_table == 'confirmed' %}selected{% endif %}>Confirmed Cases</option>
+            <option value="deaths" {% if selected_table == 'deaths' %}selected{% endif %}>Deaths</option>
+            <option value="recovery" {% if selected_table == 'recovery' %}selected{% endif %}>Recovery</option>
+        </select>
+
+        <button type="button" onclick="compareData()">Compare</button>
+    </form>
+
+    <!-- Chart container with larger dimensions -->
+    <div id="chart_div"></div>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="script.js"></script>
+</body>
+</html>
