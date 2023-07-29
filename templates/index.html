@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>COVID-19 Dashboard</title>
   <link rel="stylesheet" href="static/bootstrap@5.3.0/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <link rel="stylesheet" href="static/leaflet@1.7.1/leaflet.css" />
 </head>
 
 <body>
@@ -21,10 +21,10 @@
         <a class="nav-link active" id="mapTab" data-bs-toggle="tab" href="#mapContent" role="tab" aria-controls="mapContent" aria-selected="true">Global Snapshot</a>
       </li>
       <li class="nav-item" role="presentation">
-        <a class="nav-link" id="visualization2Tab" data-bs-toggle="tab" href="#visualization2Content" role="tab" aria-controls="visualization2Content" aria-selected="false">Visualization 2</a>
+        <a class="nav-link" id="visualization2Tab" data-bs-toggle="tab" href="#visualization2Content" role="tab" aria-controls="visualization2Content" aria-selected="false">Country Comparisons</a>
       </li>
       <li class="nav-item" role="presentation">
-        <a class="nav-link" id="visualization3Tab" data-bs-toggle="tab" href="#visualization3Content" role="tab" aria-controls="visualization3Content" aria-selected="false">Visualization 3</a>
+        <a class="nav-link" id="visualization3Tab" data-bs-toggle="tab" href="#visualization3Content" role="tab" aria-controls="visualization3Content" aria-selected="false">Covid-19 over Time</a>
       </li>
     </ul>
 
@@ -32,11 +32,11 @@
     <div class="tab-content" id="myTabContent">
       <div class="tab-pane fade show active" id="mapContent" role="tabpanel" aria-labelledby="mapTab">
         <!-- The map content will be dynamically loaded here using script.js -->
-        
         <div class="my-3 d-flex justify-content-between">
           <div class="d-flex align-items-center">
             <label class="me-3" for="tableSelect">Select Metric:</label>
             <select id="tableSelect">
+              <option value="" disabled>Select Metric</option>
               <option value="confirmed">Confirmed Cases</option>
               <option value="deaths">Deaths</option>
               <option value="recovery">Recovery</option>
@@ -48,9 +48,9 @@
               <option value="" selected disabled>Select Date</option>
             </select>
           </div>
-          <button id="plotBtn" class="btn btn-primary">Generate Map</button>
-          
+          <button id="plotBtn" class="btn btn-primary">Show me the Data!</button>
         </div>
+        <p>Click on any marker to get the latest Covid-19 information & data for that country</p>
         <div id="map" style="height: 600px;"></div>
       </div>
       <div class="tab-pane fade" id="visualization2Content" role="tabpanel" aria-labelledby="visualization2Tab">
@@ -71,9 +71,8 @@
 
   <!-- Include Leaflet JS file from cdn -->
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-
-  <!-- Include the updated script.js file -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="static/script.js"></script>
-</body>
+  </body>
 
 </html>
