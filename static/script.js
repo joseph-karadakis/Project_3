@@ -1,19 +1,11 @@
 // Global variables
 let map;
-let markersLayer;
+let markersLayer; 
 
 // Function to initialize the map
 function initMap() {
   map = L.map('map').setView([0, 0], 2);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-  markersLayer = L.layerGroup().addTo(map); // Add this line to create the markersLayer
-  console.log("Map initialized successfully.");
-}
-// Function to get the marker color based on mortality rate
-function getMarkerColor(mortalityRate) {
-  // Use D3 scale to map the mortality rate to a color range
-  const colorScale = d3.scaleLinear().domain([0, 10]).range(["#FF9800", "#E91E63"]);
-  return colorScale(mortalityRate);
 }
 
 // Function to update the markers on the map
@@ -27,40 +19,35 @@ async function updateMarkers(data) {
     const cases = row.Cases;
     const country = row.Country;
     const provinceState = row.Province;
-    console.log(provinceState)
 
     // Check if lat, long, and cases are valid numbers
     if (!isNaN(lat) && !isNaN(long) && !isNaN(cases)) {
-      // Fetch deaths data for the selected date and coordinates
-      const selectedDate = document.getElementById('dateSelect').value;
-      const deaths = await getDeathsData(selectedDate, lat, long);
-
-      // Calculate mortality rate
-      const mortalityRate = ((deaths / cases) * 100).toFixed(2);
-      const formattedMortalityRate = mortalityRate + "%";
-
-      // Format cases and deaths numbers with commas
+      // Format cases numbers with commas
       const formattedCases = cases.toLocaleString();
-      const formattedDeaths = deaths.toLocaleString();
 
       // Create a circle marker for each data point
       const marker = L.circleMarker([lat, long], {
-        radius: Math.log(cases) * 1,
+        radius: Math.log(cases) * 0.75,
         color: '#FF5722',
-        fillColor: getMarkerColor(mortalityRate),
         fillOpacity: 0.7,
       });
 
-      
-
       // Add a tooltip to display information
-      if (provinceState !== "unknown"){
+      if (provinceState !== 'unknown') {
         marker.bindTooltip(
-        `Country: ${country}<br>Province/State: ${provinceState}<br>Cases: ${formattedCases}<br>Deaths: ${formattedDeaths}<br>Mortality Rate: ${mortalityRate}%`
-      ).openTooltip();
+          `<strong>Country:</strong><strong>${country}</strong><br>Province/State: ${provinceState}<br>Cases: ${formattedCases}`
+        ).openTooltip();
       } else {
-        marker.bindTooltip(`Country: ${country}<br>Cases: ${formattedCases}<br>Deaths: ${formattedDeaths}<br>Mortality Rate: ${mortalityRate}%`);
+        marker.bindTooltip(
+          `<strong>Country:</strong><strong>${country}</strong><br>Cases: ${formattedCases}`
+        );
       }
+
+      // Add a click event listener to the marker
+      marker.on("click", () => {
+        const url = `https://coronavirus.jhu.edu/region/${encodeURIComponent(country)}`;
+        window.open(url, "_blank");
+      });
 
       // Add the marker to the markers layer
       markersLayer.addLayer(marker);
@@ -68,31 +55,56 @@ async function updateMarkers(data) {
       console.log(`Invalid data: Lat: ${lat} Long: ${long} Cases: ${cases}`);
     }
   }
-
-  console.log("Markers updated successfully.");
-}
-
-// Function to fetch deaths data from the server
-async function getDeathsData(selectedDate, lat, long) {
-  try {
-    const response = await axios.get(`/get_deaths_data/deaths/${selectedDate}/${lat}/${long}`);
-    return response.data.deaths;
-  } catch (error) {
-    console.error("Error fetching deaths data:", error);
-    return 0;
-  }
+  console.log('Markers updated successfully.');
 }
 
 // Function to fetch data from the server
 function fetchData(selectedTable, selectedDate) {
-  axios.get(`/get_data/${selectedTable}/${selectedDate}`)
+  axios
+    .get(`/get_data/${selectedTable}/${selectedDate}`)
     .then((response) => {
       const data = response.data.data;
-      console.log("Data from server:", data);
+      console.log('Data from server:', data);
       updateMarkers(data);
     })
     .catch((error) => {
       console.error('Error fetching data:', error);
+    });
+}
+
+// Function to format the date in String
+function formatDate(dateStr) {
+  const date = new Date(dateStr);
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+// Function to clear markers when re entering the tab
+function handleMapVisualization() {
+  markersLayer.clearLayers();
+  // Call handleTableSelectChange to reset the dropdowns
+  handleTableSelectChange();
+}
+
+// Function to handle the "tableSelect" dropdown change event
+function handleTableSelectChange() {
+  const selectedTable = document.getElementById('tableSelect').value;
+  axios
+    .get(`/get_dates/${selectedTable}`)
+    .then((response) => {
+      const dates = response.data;
+      const dateSelect = document.getElementById('dateSelect');
+      dateSelect.innerHTML = '<option value="" selected disabled>Select Date</option>';
+      dates.forEach((date) => {
+        const option = document.createElement('option');
+        option.value = date; // Set the option value to the original date string
+        option.text = formatDate(date); // Format the date string as "January 2021"
+        dateSelect.add(option);
+      });
+      dateSelect.disabled = false;
+    })
+    .catch((error) => {
+      console.error('Error fetching dates:', error);
     });
 }
 
@@ -105,29 +117,39 @@ document.addEventListener('DOMContentLoaded', () => {
   plotBtn.addEventListener('click', () => {
     const selectedTable = document.getElementById('tableSelect').value;
     const selectedDate = document.getElementById('dateSelect').value;
+    if (!selectedDate) {
+      console.log('Please select a date before generating the map.');
+      return;
+    }
+    
+    // Check if markersLayer is initialized, if not, initialize it now.
+    if (!markersLayer) {
+      markersLayer = L.layerGroup().addTo(map);
+    }
+
     plotBtn.dataset.selectedTable = selectedTable;
     fetchData(selectedTable, selectedDate.slice(0, 7));
   });
 
   // Event listener for the "tableSelect" dropdown to populate the "dateSelect" dropdown
   const tableSelect = document.getElementById('tableSelect');
-  tableSelect.addEventListener('change', () => {
-    const selectedTable = tableSelect.value;
-    axios.get(`/get_dates/${selectedTable}`)
-      .then((response) => {
-        const dates = response.data;
-        const dateSelect = document.getElementById('dateSelect');
-        dateSelect.innerHTML = '<option value="" selected disabled>Select Date</option>';
-        dates.forEach((date) => {
-          const option = document.createElement('option');
-          option.text = date;
-          dateSelect.add(option);
-        });
-        dateSelect.disabled = false;
-      })
-      .catch((error) => {
-        console.error('Error fetching dates:', error);
-      });
+  tableSelect.addEventListener('change', handleTableSelectChange);
+
+  // Load table data by default (for the "Confirmed Cases" table)
+  handleTableSelectChange();
+
+  // Event listener for tab changes
+  const navTabs = document.querySelectorAll('.nav-tabs .nav-link');
+  navTabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const target = tab.getAttribute('href');
+      if (target === '#mapContent') {
+        handleMapVisualization();
+      } else if (target === '#visualization2Content') {
+        handleVisualization2();
+      } else if (target === '#visualization3Content') {
+        handleVisualization3();
+      }
+    });
   });
 });
-
