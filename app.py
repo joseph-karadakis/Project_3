@@ -69,5 +69,50 @@ def get_deaths_data(selected_date, lat, long):
     conn.close()
     return jsonify(deaths=deaths[0])
 
+@app.route('/get_countries')
+def get_countries():
+    conn = sqlite3.connect("database/dashboard_data.db")
+    cursor = conn.cursor()
+
+    # Fetch all unique countries
+    cursor.execute("SELECT DISTINCT Country_Region FROM confirmed")
+    countries = [country[0] for country in cursor.fetchall()]
+
+    conn.close()
+    return jsonify(countries)
+
+@app.route('/get_countries/<selected_table>')
+def send_countries(selected_table):
+    conn = sqlite3.connect("database/dashboard_data.db")
+    cursor = conn.cursor()
+
+    # Fetch all unique countries for the selected table
+    cursor.execute(f"SELECT DISTINCT Country_Region FROM {selected_table}")
+    countries = [country[0] for country in cursor.fetchall()]
+
+    conn.close()
+    return jsonify(countries)
+
+@app.route('/get_comparison_data/<selected_metric>/<country1>/<country2>')
+def get_comparison_data(selected_metric, country1, country2):
+    conn = sqlite3.connect("database/dashboard_data.db")
+    cursor = conn.cursor()
+
+    # Fetch data for the two selected countries and metric
+    cursor.execute(f"SELECT date, {selected_metric} FROM {selected_metric} WHERE Country_Region=? AND (date BETWEEN '2020-01-22' AND '2023-12-31') ORDER BY date", (country1,))
+    country1_data = cursor.fetchall()
+
+    cursor.execute(f"SELECT date, {selected_metric} FROM {selected_metric} WHERE Country_Region=? AND (date BETWEEN '2020-01-22' AND '2023-12-31') ORDER BY date", (country2,))
+    country2_data = cursor.fetchall()
+
+    conn.close()
+
+    data = {
+        country1: {row[0]: row[1] for row in country1_data},
+        country2: {row[0]: row[1] for row in country2_data},
+    }
+
+    return jsonify(data=data)
+
 if __name__ == '__main__':
     app.run(debug=True)

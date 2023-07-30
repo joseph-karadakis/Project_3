@@ -8,13 +8,15 @@
   <title>COVID-19 Dashboard</title>
   <link rel="stylesheet" href="static/bootstrap@5.3.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="static/leaflet@1.7.1/leaflet.css" />
-</head>
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/2.3.0/luxon.min.js"></script>
+  </head>
 <body>
   <div class="container">
     <h1>COVID-19 Dashboard</h1>
     <p>This dashboard provides visualizations of global COVID-19 cases.</p>
-
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" id="myTab" role="tablist">
       <li class="nav-item" role="presentation">
@@ -27,16 +29,15 @@
         <a class="nav-link" id="visualization3Tab" data-bs-toggle="tab" href="#visualization3Content" role="tab" aria-controls="visualization3Content" aria-selected="false">Covid-19 over Time</a>
       </li>
     </ul>
-
     <!-- Tab contents -->
     <div class="tab-content" id="myTabContent">
       <div class="tab-pane fade show active" id="mapContent" role="tabpanel" aria-labelledby="mapTab">
-        <!-- The map content will be dynamically loaded here using script.js -->
+        <!-- The map content will be dynamically loaded here using map_script.js -->
         <div class="my-3 d-flex justify-content-between">
           <div class="d-flex align-items-center">
             <label class="me-3" for="tableSelect">Select Metric:</label>
             <select id="tableSelect">
-              <option value="" disabled>Select Metric</option>
+              <option value="" disabled selected>Select Metric</option>
               <option value="confirmed">Confirmed Cases</option>
               <option value="deaths">Deaths</option>
               <option value="recovery">Recovery</option>
@@ -44,7 +45,7 @@
           </div>
           <div class="d-flex align-items-center">
             <label class="me-3" for="dateSelect">Select Date:</label>
-            <select id="dateSelect">
+            <select id="dateSelect" disabled>
               <option value="" selected disabled>Select Date</option>
             </select>
           </div>
@@ -54,19 +55,48 @@
         <div id="map" style="height: 600px;"></div>
       </div>
       <div class="tab-pane fade" id="visualization2Content" role="tabpanel" aria-labelledby="visualization2Tab">
-        <!-- Visualization 2 content will be dynamically loaded here -->
+        <!-- The bar chart content will be dynamically loaded here using barChartScript.js -->
+        <div class="my-3 d-flex justify-content-between">
+          <div class="d-flex align-items-center">
+            <label class="me-3" for="comparisonMetricSelect">Select Metric:</label>
+            <select id="comparisonMetricSelect">
+              <option value="" disabled selected>Select Metric</option>
+              <option value="confirmed">Confirmed Cases</option>
+              <option value="deaths">Deaths</option>
+              <option value="recovery">Recovery</option>
+            </select>
+          </div>
+          <div class="d-flex align-items-center">
+            <label class="me-3" for="countrySelect1">Select Country 1:</label>
+            <select id="countrySelect1">
+              <option value="" disabled selected>Select Country</option>
+              <!-- Add options for countries here -->
+            </select>
+          </div>
+          <div class="d-flex align-items-center">
+            <label class="me-3" for="countrySelect2">Select Country 2:</label>
+            <select id="countrySelect2">
+              <option value="" disabled selected>Select Country</option>
+              <!-- Add options for countries here -->
+            </select>
+          </div>
+          <button id="compareBtn" class="btn btn-primary">Compare</button>
+        </div>
+        <p>Select a metric and two countries to compare the number of cases between them.</p>
+        <div>
+          <canvas id="barChart"></canvas>
+        </div>
       </div>
       <div class="tab-pane fade" id="visualization3Content" role="tabpanel" aria-labelledby="visualization3Tab">
-        <!-- Visualization 3 content will be dynamically loaded here -->
+        <!-- Visualization 3 content will be loaded here -->
       </div>
     </div>
-
   </div>
-
   <script src="static/axios/axios.min.js"></script>
   <script src="static/bootstrap@5.3.0/js/bootstrap.bundle.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-   <script src="static/script.js"></script>
-  </body>
-
+  <script src="static/map_script.js"></script>
+  <script src="static/barChartScript.js"></script>
+  <!-- <script src="static/mainScript.js"></script> 3rd script goes here-->
+</body>
 </html>

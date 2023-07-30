@@ -1,6 +1,7 @@
 // Global variables
 let map;
 let markersLayer;
+let mapContainer; // Declare mapContainer as a global variable
 
 // Function to initialize the map
 function initMap() {
@@ -94,29 +95,32 @@ function formatDate(dateStr) {
 // Function to clear markers and deinitialize the map when leaving the tab
 function handleMapVisualization() {
   const mapContainer = document.getElementById('map');
-  const selectedTable = document.getElementById('tableSelect').value;
-  const selectedDate = document.getElementById('dateSelect').value;
+  mapContainer.style.display = 'none'; // Hide the map container
+  markersLayer.clearLayers(); // Remove markers from the map if any exist
+  deinitMap();
+  // Reset the dropdowns when leaving the map tab
+  resetDropdowns();
+}
 
-  if (mapContainer.style.display === 'none') {
-    // If the map container is hidden, show it again and reset the dropdowns
-    mapContainer.style.display = 'block';
-  } else {
-    markersLayer.clearLayers(); // Remove markers from the map if any exist
-    deinitMap();
-    // Reset the dropdowns when leaving the map tab
-    resetDropdowns();
+// Function to handle click on the "Global Snapshot" tab
+function handleMapTabClick() {
+  if (mapContainer && mapContainer.style.display === 'none') {
+    // If the map is already hidden, it means the tab was clicked again. No action needed.
+    return;
   }
+  handleMapVisualization();
 }
 
 function resetDropdowns() {
   // Reset the "tableSelect" dropdown to its default (first) option
   const tableSelect = document.getElementById('tableSelect');
   tableSelect.selectedIndex = 0;
-  tableSelect.disable = true;
+  tableSelect.disabled = false; // Enable the "Select Metric" dropdown
+
   // Clear the "dateSelect" dropdown and add a default disabled option
   const dateSelect = document.getElementById('dateSelect');
   dateSelect.innerHTML = '<option value="" selected disabled>Select Date</option>';
-  dateSelect.disabled = true;
+  dateSelect.disabled = true; // Disable the "Select Date" dropdown
 }
 
 function handleTableSelectChange() {
@@ -129,11 +133,11 @@ function handleTableSelectChange() {
       dateSelect.innerHTML = '<option value="" selected disabled>Select Date</option>';
       dates.forEach((date) => {
         const option = document.createElement('option');
-        option.value = date; 
+        option.value = date;
         option.text = formatDate(date);
         dateSelect.add(option);
       });
-      dateSelect.disabled = false;
+      dateSelect.disabled = false; // Enable the "Select Date" dropdown once data is fetched
     })
     .catch((error) => {
       console.error('Error fetching dates:', error);
@@ -142,9 +146,6 @@ function handleTableSelectChange() {
 
 // Wait for the DOM to load
 document.addEventListener('DOMContentLoaded', () => {
-  const mapContainer = document.getElementById('map');
-  mapContainer.style.display = 'none';
-
   function showErrorPopup(message) {
     alert(message);
   }
@@ -154,8 +155,8 @@ document.addEventListener('DOMContentLoaded', () => {
   plotBtn.addEventListener('click', () => {
     const selectedTable = document.getElementById('tableSelect').value;
     const selectedDate = document.getElementById('dateSelect').value;
-    if (!selectedDate) {
-      const errorMessage = 'Please select a metric and date to see data on the map.';
+    if (!selectedTable || !selectedDate) { // Check if both metric and date are selected
+      const errorMessage = 'Please select both a metric and date to see data on the map.';
       showErrorPopup(errorMessage);
       return;
     }
@@ -174,34 +175,14 @@ document.addEventListener('DOMContentLoaded', () => {
       markersLayer = L.layerGroup().addTo(map);
     }
 
-    plotBtn.dataset.selectedTable = selectedTable;
     fetchData(selectedTable, selectedDate.slice(0, 7));
   });
 
   resetDropdowns();
-
+// Event listener for the "Global Snapshot" tab click
+const mapTab = document.getElementById('mapTab');
+mapTab.addEventListener('click', handleMapTabClick);
   // Event listener for the "tableSelect" dropdown to populate the "dateSelect" dropdown
   const tableSelect = document.getElementById('tableSelect');
   tableSelect.addEventListener('change', handleTableSelectChange);
-
-  // Event listener for tab changes
-  const navTabs = document.querySelectorAll('.nav-tabs .nav-link');
-  navTabs.forEach((tab) => {
-    tab.addEventListener('shown.bs.tab', () => {
-      const target = tab.getAttribute('href');
-      if (target === '#mapContent') {
-        // Remove markers from the map if any exist
-        handleMapVisualization();
-        // handleTableSelectChange();
-      } else if (target === '#visualization2Content') {
-        handleVisualization2();
-      } else if (target === '#visualization3Content') {
-        handleVisualization3();
-      } else {
-        // For other tabs, hide the map container
-        const mapContainer = document.getElementById('map');
-        mapContainer.style.display = 'none';
-      }
-    });
-  });
 });
