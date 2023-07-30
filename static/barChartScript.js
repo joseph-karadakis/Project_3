@@ -125,10 +125,14 @@ function drawChartWithData(data, country1, country2) {
 
 // Function to reset the country dropdowns to their initial state
 function resetCountryDropdowns() {
+  const comparisonMetricSelect = document.getElementById("comparisonMetricSelect");
   const countrySelect1 = document.getElementById("countrySelect1");
   const countrySelect2 = document.getElementById("countrySelect2");
 
-  // Disable "Select Country" option and reset selected index to 0
+  // Reset the first dropdown (comparisonMetricSelect) to the default option "Select Metric"
+  comparisonMetricSelect.selectedIndex = 0;
+
+  // Disable "Select Country" options and reset selected index to 0
   countrySelect1.selectedIndex = 0;
   countrySelect1.disabled = true;
 
@@ -136,17 +140,34 @@ function resetCountryDropdowns() {
   countrySelect2.disabled = true;
 }
 
+// Global variable to track if the metric has been changed by the user
+let metricChangedByUser = false;
+
 // Function to handle the metric selection change in the Country Comparison tab
 function handleComparisonMetricSelectChange() {
   const selectedTable = document.getElementById("comparisonMetricSelect").value;
   const countrySelect1 = document.getElementById("countrySelect1");
   const countrySelect2 = document.getElementById("countrySelect2");
 
-  // Reset the country dropdowns when a new metric is selected
-  resetCountryDropdowns();
-  // resetBarChart();
+  // If the metric has been changed by the user, reset the bar chart
+  if (metricChangedByUser) {
+    resetBarChart();
+  }
 
   if (!selectedTable) {
+    // Reset the country dropdowns when the default option is selected
+
+      // If no metric is selected (default option "Select Metric" is selected),
+      // then disable the country dropdowns and reset their values
+      countrySelect1.selectedIndex = 0;
+      countrySelect1.disabled = true;
+  
+      countrySelect2.selectedIndex = 0;
+      countrySelect2.disabled = true;
+      return;
+    
+    // Metric is not changed by the user anymore
+      metricChangedByUser = false;
     return;
   }
 
@@ -160,6 +181,9 @@ function handleComparisonMetricSelectChange() {
       // Enable the country dropdowns since a metric is selected
       countrySelect1.disabled = false;
       countrySelect2.disabled = false;
+
+      // Metric is changed by the user
+      metricChangedByUser = true;
     })
     .catch((error) => {
       console.error("Error fetching countries:", error);
@@ -196,39 +220,56 @@ function compareData() {
       chartContainer.innerHTML = '<p class="text-danger">Error fetching data. Please try again later.</p>';
     });
 }
-// Function to handle click on the "Country Comparison" tab
-function handleComparisonTabClick() {
-  console.log("Here")
-  resetBarChart(); // Reset the bar chart and dropdowns when entering the tab
-}
 
 // Function to reset the bar chart and dropdowns
 function resetBarChart() {
-  if (barChart) {
-    barChart.destroy(); // Destroy the existing bar chart
-    barChart = null;
-  }
+  // Clear the existing data and labels for each dataset
+  barChart.data.labels = [];
+  barChart.data.datasets.forEach((dataset) => {
+    dataset.data = [];
+  });
+
+  // Reset the legend labels to their initial state
+  const comparisonMetricSelect1 = document.getElementById('comparisonMetricSelect');
+  const defaultOptions = ['Country 1', 'Country 2',];
+  barChart.data.datasets.forEach((dataset, index) => {
+  dataset.label = defaultOptions[index];
+  });
+
+
+  // Update the chart
+  barChart.update();
 
   // Reset the dropdowns to their default (first) options
-  const comparisonMetricSelect = document.getElementById('comparisonMetricSelect');
-  comparisonMetricSelect.selectedIndex = 0;
+  const countrySelect1 = document.getElementById("countrySelect1");
+  const countrySelect2 = document.getElementById("countrySelect2");
 
-  const countrySelect1 = document.getElementById('countrySelect1');
+  // Disable "Select Country" options and reset selected index to 0
   countrySelect1.selectedIndex = 0;
+  countrySelect1.disabled = true;
 
-  const countrySelect2 = document.getElementById('countrySelect2');
   countrySelect2.selectedIndex = 0;
+  countrySelect2.disabled = true;
 }
-// Load the Google Charts library and execute the bar chart script once it's loaded
-google.charts.load('current', { packages: ['corechart'] });
-google.charts.setOnLoadCallback(function () {
-  // Add event listeners and other chart-related code here
-  document.getElementById("compareBtn").addEventListener("click", compareData);
-  document.getElementById("comparisonMetricSelect").addEventListener("change", handleComparisonMetricSelectChange);
 
-  // Trigger the metric selection change event on page load (to populate the country dropdowns for the default metric)
-  handleComparisonMetricSelectChange();
-});
+// Function to handle click on the "Country Comparison" tab
+function handleComparisonTabClick() {
+  const selectedTable = document.getElementById("comparisonMetricSelect").value;
+  resetCountryDropdowns();
+  console.log("Here");
+  resetBarChart();
+  if (barChart) {
+    // Destroy the chart
+    barChart.destroy();
+    // Set the chart instance to null to indicate that it has been destroyed
+    barChart = null;
+  };
+  
+  selectedTable.selectedIndex = 0;
+  // Reset the metricChangedByUser flag
+  metricChangedByUser = false; // Reset the bar chart and dropdowns when entering the tab
+}
+
 // Wait for the DOM to load
 document.addEventListener('DOMContentLoaded', () => {
   // Event listener for the metric selection change
@@ -238,4 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Event listener for the "Compare" button click
   const compareBtn = document.getElementById("compareBtn");
   compareBtn.addEventListener('click', compareData);
+
+  // Event listener for the "Country Comparison" tab click
+  const visualization2Tab = document.getElementById("visualization2Tab");
+  visualization2Tab.addEventListener('click', handleComparisonTabClick);
 });

@@ -1,7 +1,9 @@
 import sqlite3
 from flask import Flask, render_template, jsonify
+import json
 
 app = Flask(__name__)
+
 
 # Function to get data from the selected table and date
 def get_data(selected_table, selected_date):
@@ -113,6 +115,26 @@ def get_comparison_data(selected_metric, country1, country2):
     }
 
     return jsonify(data=data)
+@app.route('/database/jsonData/daily_confirmed_data.js')
+def get_daily_confirmed_data():
+    with open('database/jsonData/daily_confirmed_data.js') as f:
+        daily_confirmed_data = json.load(f)
+
+    return jsonify(daily_confirmed_data)
+
+@app.route('/database/jsonData/daily_deaths_data.js')
+def get_daily_deaths_data():
+    with open('database/jsonData/daily_deaths_data.js') as f:
+        daily_deaths_data = json.load(f)
+
+    return jsonify(daily_deaths_data)
+
+@app.route('/database/jsonData/daily_recovery_data.js')
+def get_daily_recovery_data():
+    with open('database/jsonData/daily_recovery_data.js') as f:
+        daily_recovery_data = json.load(f)
+
+    return jsonify(daily_recovery_data)
 
 if __name__ == '__main__':
     app.run(debug=True)
