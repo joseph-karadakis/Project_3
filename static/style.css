@@ -1,0 +1,23 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Geneva';
+    color:rgb(0, 0, 0);
+    text-align: start;
+}
+header {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Geneva';
+    color:rgb(0, 0, 0);
+    text-align: start;
+}
+body {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #FFFFFF, #EA9494);
