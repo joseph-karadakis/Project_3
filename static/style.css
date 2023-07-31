@@ -1,0 +1,44 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Helvetica', sans-serif;
+    color:rgb(255, 255, 255);
+    text-align: center;
+}
+header {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Helvetica', sans-serif;
+    color:rgb(255, 255, 255);
+    text-align: start;
+}
+body {
+    position: relative;
+    display: flex;
+    justify-content: start;
+    align-items: stretch;
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #baa7ef, #7bbfe1fb);
+    font-family: 'Helvetica', sans-serif;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  h1 {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  /* p {
+    margin-bottom: 20px;
+  }
+  .well .btn-group .form-check-input {
+    margin-right: 5px;
+  }
+   */

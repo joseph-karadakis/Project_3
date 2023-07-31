@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="stylesheet" href="static/style.css">
+  <link rel="stylesheet" href="static/bootstrap@5.3.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="static/leaflet@1.7.1/leaflet.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/2.3.0/luxon.min.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.25.0/plotly.min.js"></script>
+</head>
+
+<body>
+  <div class="container" style="text-align: center;">
+    <h1>COVID-19 Dashboard</h1>
+    <h4>Select a tab to explore global Covid-19 data collected by JHU</h4>
+    <br>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs justify-content-center" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <a class="nav-link active" id="mapTab" data-bs-toggle="tab" href="#mapContent" role="tab" aria-controls="mapContent" aria-selected="true">Global Snapshot</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="visualization2Tab" data-bs-toggle="tab" href="#visualization2Content" role="tab" aria-controls="visualization2Content" aria-selected="false">Country Comparisons</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="visualization3Tab" data-bs-toggle="tab" href="#visualization3Content" role="tab" aria-controls="visualization3Content" aria-selected="false">Covid-19 over Time</a>
+      </li>
+    </ul>
+    <!-- Tab contents -->
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade show active" id="mapContent" role="tabpanel" aria-labelledby="mapTab">
+        <!-- The map content will be dynamically loaded here using map_script.js -->
+        <div class="my-3 d-flex justify-content-between">
+          <div class="d-flex align-items-center">
+            <label class="me-3" for="tableSelect">Select Metric:</label>
+            <select id="tableSelect" class="form-select w-auto">
+              <option value="" disabled selected>Select Metric</option>
+              <option value="confirmed">Confirmed Cases</option>
+              <option value="deaths">Deaths</option>
+              <option value="recovery">Recovery</option>
+            </select>
+          </div>
+          <div class="d-flex align-items-center">
+            <label class="me-3" for="dateSelect">Select Date:</label>
+            <select id="dateSelect" disabled class="form-select w-auto">
+              <option value="" selected disabled>Select Date</option>
+            </select>
+          </div>
+          <button id="plotBtn" class="btn btn-primary">Show me the Data!</button>
+        </div>
+        <p>Click on any marker to get the latest Covid-19 information & data for that country</p>
+        <div id="map" style="height: 600px;"></div>
+      </div>
+      <div class="tab-pane fade" id="visualization2Content" role="tabpanel" aria-labelledby="visualization2Tab">
+        <div class="my-3 d-flex justify-content-between">
+          <div class="d-flex align-items-center">
+            <label class="me-3" for="comparisonMetricSelect">Select Metric:</label>
+            <select id="comparisonMetricSelect" class="form-select w-auto">
+              <option value="" disabled selected>Select Metric</option>
+              <option value="confirmed">Confirmed Cases</option>
+              <option value="deaths">Deaths</option>
+              <option value="recovery">Recovery</option>
+            </select>
+          </div>
+          <div class="d-flex align-items-center">
+            <label class="me-3" for="countrySelect1">Select Country 1:</label>
+            <select id="countrySelect1" class="form-select w-auto">
+              <option value="" disabled selected>Select Country</option>
+            </select>
+          </div>
+          <div class="d-flex align-items-center">
+            <label class="me-3" for="countrySelect2">Select Country 2:</label>
+            <select id="countrySelect2" class="form-select w-auto">
+              <option value="" disabled selected>Select Country</option>
+            </select>
+          </div>
+          <button id="compareBtn" class="btn btn-primary">Compare</button>
+        </div>
+        <p>Select a metric and two countries to compare the number of cases between them.</p>
+        <div>
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+      <div class="tab-pane fade" id="visualization3Content" role="tabpanel" aria-labelledby="visualization3Tab">
+        <div class="my-3 d-flex justify-content-between">
+          <div class="d-flex align-items-center">
+            
+            <div class="btn-group">
+              <p>Select Metrics:</p>
+              <div class="form-check">
+                <input type="checkbox" id="confirmedCheckbox" class="form-check-input">
+                <label for="confirmedCheckbox" class="form-check-label">Confirmed Cases</label>
+              </div>
+              <div class="form-check">
+                <input type="checkbox" id="deathsCheckbox" class="form-check-input">
+                <label for="deathsCheckbox" class="form-check-label">Deaths</label>
+              </div>
+              <div class="form-check">
+                <input type="checkbox" id="recoveriesCheckbox" class="form-check-input">
+                <label for="recoveriesCheckbox" class="form-check-label">Recoveries</label>
+              </div>
+                <label class="me-3" for="country-dropdown">Select A Country:</label>
+                <select id="country-dropdown" class="form-select w-auto">
+                <option value="" disabled selected>Select a Metric first</option>
+              </select>
+            <button id="chart-button" class="btn btn-primary mt-3">Chart Data</button>
+          </div>
+        </div>
+        <div id="line-stack"></div>
+      </div>
+    </div>
+  </div>
+  <script src="static/axios/axios.min.js"></script>
+  <script src="static/bootstrap@5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="static/mapScript.js"></script>
+  <script src="static/barChartScript.js"></script>
+  <script src="static/stackedLineGraphScript.js"></script>
+</body>
+
+</html>
