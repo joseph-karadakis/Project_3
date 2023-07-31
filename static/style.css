@@ -3,7 +3,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Helvetica', sans-serif;
-    color:rgb(33, 29, 29);
+    color:rgb(255, 255, 255);
     text-align: center;
 }
 header {
@@ -11,7 +11,7 @@ header {
     padding: 0;
     box-sizing: border-box;
     font-family: 'Helvetica', sans-serif;
-    color:rgb(33, 29, 29);
+    color:rgb(255, 255, 255);
     text-align: start;
 }
 body {
@@ -20,7 +20,7 @@ body {
     justify-content: start;
     align-items: stretch;
     min-height: 100vh;
-    background: linear-gradient(to bottom, #bbdeec, #72b4d5);
+    background: linear-gradient(to bottom, #baa7ef, #7bbfe1fb);
     font-family: 'Helvetica', sans-serif;
 }
 .container {
