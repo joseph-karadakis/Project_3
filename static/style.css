@@ -20,7 +20,7 @@ body {
     justify-content: start;
     align-items: stretch;
     min-height: 100vh;
-    background: linear-gradient(to bottom, #FFFFFF, #EA9494);
+    background: linear-gradient(to bottom, #bbdeec, #72b4d5);
     font-family: 'Helvetica', sans-serif;
 }
 .container {
