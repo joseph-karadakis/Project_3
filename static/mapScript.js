@@ -40,7 +40,7 @@ async function updateMarkers(data) {
       // Create a circle marker for each data point
       const marker = L.circleMarker([lat, long], {
         radius: Math.log(cases) * 0.75,
-        color: '#FF5722',
+        color: 'mediumorchid',
         fillOpacity: 0.7,
       });
 

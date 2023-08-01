@@ -3,7 +3,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Helvetica', sans-serif;
-    color:rgb(255, 255, 255);
+    color:rgb(0, 0, 0);
     text-align: center;
 }
 header {
@@ -11,7 +11,7 @@ header {
     padding: 0;
     box-sizing: border-box;
     font-family: 'Helvetica', sans-serif;
-    color:rgb(255, 255, 255);
+    color:rgb(0, 0, 0);
     text-align: start;
 }
 body {
