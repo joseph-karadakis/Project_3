@@ -54,6 +54,7 @@ function drawChartWithData(data, country1, country2) {
       {
         label: country1,
         data: cases1,
+        color: 'black',
         backgroundColor: "cornflowerblue",
         borderColor: "cornflowerblue",
         borderWidth: 1,
@@ -61,6 +62,7 @@ function drawChartWithData(data, country1, country2) {
       {
         label: country2,
         data: cases2,
+        color: 'black',
         backgroundColor: "darkorchid",
         borderColor: "darkorchid",
         borderWidth: 1,
@@ -72,20 +74,26 @@ function drawChartWithData(data, country1, country2) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
+    color: 'black',
     legend: {
       position: "top",
+      color: 'black',
     },
     scales: {
       x: {
+        
         title: {
           display: true,
           text: "Date",
+          color: 'black'
         },
+        color: 'black',
       },
       y: {
-        title: {
+          title: {
           display: true,
           text: "Cases",
+          color: 'black',
         },
         suggestedMin: 0,
         suggestedMax: Math.max(...cases1, ...cases2) * 1.2,
